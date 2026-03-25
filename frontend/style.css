@@ -1,0 +1,238 @@
+/* ===== Global Styles ===== */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #222;
+}
+
+/* ===== Header ===== */
+.header {
+  width: 100%;
+  height: 140px;
+  background: linear-gradient(90deg, #003399 60%, #ff6600 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 0;
+}
+
+.header-logo {
+  width: 90px;
+  height: auto;
+  margin-right: 15px;
+  z-index: 1;
+}
+
+.header-text {
+  text-align: left;
+  z-index: 1;
+}
+
+.header-text h1 {
+  color: #001f54;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-text h2 {
+  color: #003399;
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.header-text p {
+  font-size: 12px;
+  color: #333;
+  margin-top: 3px;
+}
+
+/* ===== Register Box ===== */
+.register-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-box {
+  display: flex;
+  flex-direction: row;
+  background: linear-gradient(120deg, #fff 60%, #e0e7ff 100%);
+  border-radius: 18px;
+  padding: 40px 32px;
+  width: 700px;
+  color: #222;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Left Side */
+.register-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.register-logo {
+  width: 120px;
+  height: auto;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Side */
+.register-right {
+  text-align: center;
+  flex: 2;
+  padding-left: 30px;
+  text-align: left;
+}
+
+.register-right h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #003399;
+  font-weight: 700;
+}
+
+/* Form Styling */
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* spacing between each row */
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+form label {
+  width: 100px; /* fixed label width for alignment */
+  text-align: right;
+  margin-right: 10px;
+  color: white;
+  font-weight: 500;
+}
+
+form input {
+  flex: 1;
+  max-width: 250px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 15px;
+  background: #f8fafc;
+  transition: border 0.2s;
+}
+form input:focus {
+  border: 1.5px solid #003399;
+  background: #fff;
+}
+
+/* Buttons */
+.btn {
+  margin-top: 10px;
+  margin-left: 110px; /* same as label width + margin-right */
+  background: linear-gradient(90deg, #003399 60%, #ff6600 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  width: 250px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition:
+    background 0.3s,
+    box-shadow 0.3s;
+}
+
+.btn:hover {
+  background: linear-gradient(90deg, #002b80 60%, #ff6600 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.login-text {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: rgb(251, 252, 252);
+  padding-left: 100px;
+}
+.login-text a {
+  color: #2a06f3;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-link {
+  color: #0044cc; /* blue link color */
+  text-decoration: none;
+  font-weight: bold;
+  margin-left: 4px;
+  transition:
+    color 0.3s,
+    text-decoration 0.3s;
+  cursor: pointer;
+  padding-left: 20px;
+}
+
+.login-link:hover {
+  color: #002b80; /* darker blue when hovered */
+  text-decoration: underline;
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .register-box {
+    flex-direction: column;
+    width: 90%;
+    text-align: center;
+    padding: 25px;
+  }
+
+  .register-right {
+    padding-left: 0;
+  }
+
+  .register-left {
+    margin-bottom: 20px;
+  }
+
+  .register-logo {
+    width: 100px;
+  }
+
+  .register-right h3 {
+    text-align: center;
+  }
+
+  form input {
+    font-size: 14px;
+    padding: 8px;
+  }
+}

@@ -1,0 +1,33 @@
+/* School Department Section Styles */
+.school-dept-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 10px;
+}
+.school-dept-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 4px #eee;
+  transition: box-shadow 0.2s;
+}
+.school-dept-item:hover {
+  box-shadow: 0 4px 16px #e0e0e0;
+}
+.school-dept-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+}
+.school-dept-name {
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #222;
+}

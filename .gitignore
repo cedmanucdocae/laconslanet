@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.development
+.env.production
+*.env
+
+# Build outputs
+dist/
+build/
+*.min.js
+*.min.css
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Uploaded files (user-generated content)
+uploads/
+backend/uploads/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Zip files
+*.zip
+
+# Personal notes and drafts
+*.txt
+!README.txt
+
+# Package lock files (optional - some teams prefer to commit these)
+# package-lock.json
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Debug files
+*.log
+.pnpm-debug.log*
