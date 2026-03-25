@@ -19,18 +19,16 @@ for (const [key, value] of params.entries()) {
 }
 
 // FINAL STRONG FALLBACK
-if (!visitingUserId || visitingUserId === "undefined" || visitingUserId === "") {
+if (
+  !visitingUserId ||
+  visitingUserId === "undefined" ||
+  visitingUserId === ""
+) {
   visitingUserId =
-    params.get("userId") ||
-    params.get("userid") ||
-    params.get("id") ||
-    null;
+    params.get("userId") || params.get("userid") || params.get("id") || null;
 }
 
 console.log("Detected visitingUserId =", visitingUserId);
-
-
-
 
 // ===============================
 // NAVBAR DROPDOWNS
@@ -39,6 +37,7 @@ const profileIcon = document.getElementById("profileIcon");
 const dropdown = document.getElementById("profileDropdown");
 const msgIcon = document.getElementById("msgIcon");
 const notifIcon = document.getElementById("notifIcon");
+const msgBadge = document.getElementById("msgBadge");
 const msgDropdown = document.getElementById("msgDropdown");
 const notifDropdown = document.getElementById("notifDropdown");
 
@@ -90,7 +89,6 @@ async function loadNavbarProfile() {
     if (navDepartment) {
       navDepartment.textContent = user.department ? `(${user.department})` : "";
     }
-
   } catch (err) {
     console.error("⚠️ Failed to load navbar user on profile page:", err);
   }
@@ -100,8 +98,6 @@ async function loadNavbarProfile() {
 document.addEventListener("DOMContentLoaded", () => {
   loadNavbarProfile();
 });
-
-
 
 function closeAll() {
   dropdown.classList.remove("active");
@@ -116,10 +112,12 @@ profileIcon.addEventListener("click", (e) => {
   if (!open) dropdown.classList.add("active");
 });
 
-msgIcon.addEventListener("click", (e) => {
-  e.stopPropagation();
-  closeAll();
-  msgDropdown.classList.add("active");
+msgIcon.addEventListener("click", () => {
+  if (msgBadge) {
+    msgBadge.textContent = "0";
+    msgBadge.style.display = "none";
+  }
+  window.location.href = "../Mess1/Message/message.html";
 });
 
 notifIcon.addEventListener("click", (e) => {
@@ -127,7 +125,6 @@ notifIcon.addEventListener("click", (e) => {
   closeAll();
   notifDropdown.classList.add("active");
 });
-
 
 document.addEventListener("click", () => closeAll());
 
@@ -154,7 +151,7 @@ saveBtn.addEventListener("click", async () => {
   const newPassword = document.getElementById("passwordInput").value.trim();
   const token = localStorage.getItem("token");
 
-  if (!token) return window.location.href = "../../Login/index.html";
+  if (!token) return (window.location.href = "../../Login/index.html");
 
   try {
     const res = await fetch("http://localhost:5000/api/profile/update", {
@@ -259,19 +256,18 @@ function applyProfileData(user) {
   }
 }
 
-
 // ===============================
 // LOAD PROFILE (OWNER OR VISITED)
 // ===============================
 async function loadProfile() {
   const token = localStorage.getItem("token");
-  if (!token) return window.location.href = "../Login/index.html";
+  if (!token) return (window.location.href = "../Login/index.html");
 
   if (visitingUserId) return loadOtherProfile();
 
   try {
     const res = await fetch("http://localhost:5000/api/profile/me", {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const user = await res.json();
@@ -280,7 +276,6 @@ async function loadProfile() {
 
     window.currentUserId = user._id;
     loadMyPosts();
-
   } catch (err) {
     console.error("Error loading own profile:", err);
   }
@@ -291,9 +286,12 @@ async function loadProfile() {
 // ===============================
 async function loadOtherProfile() {
   try {
-    const res = await fetch(`http://localhost:5000/api/users/${visitingUserId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    });
+    const res = await fetch(
+      `http://localhost:5000/api/users/${visitingUserId}`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      },
+    );
 
     const user = await res.json();
     if (!res.ok) {
@@ -309,13 +307,10 @@ async function loadOtherProfile() {
 
     // Load posts for that user
     loadUserPosts(visitingUserId);
-
   } catch (err) {
     console.error("Error loading other's profile:", err);
   }
 }
-
-
 
 // ===========================================
 // RENDER MEDIA (images + videos)
@@ -365,7 +360,7 @@ function renderMedia(post) {
               (v) => `
       <video class="post-video" controls>
         <source src="${v}">
-      </video>`
+      </video>`,
             )
             .join("")
         : ""

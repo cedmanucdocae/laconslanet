@@ -70,7 +70,7 @@ app.use("/api/shares", shareRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
 
-const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/instanyaw";
+const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/LaConslaNet";
 const port = process.env.PORT || 5000;
 
 mongoose

@@ -1815,7 +1815,7 @@ video,
 /* Small phones */
 @media (max-width: 576px) {
   .nav-left .logo p {
-    display: none; /* hide InstaNyaw text, keep icon */
+    display: none; /* hide LaConslaNet text, keep icon */
   }
 
   .nav-left .logo img {

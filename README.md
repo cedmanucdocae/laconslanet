@@ -1,4 +1,4 @@
-# InstaNyaw
+# LaConslaNet
 
 A social media/community platform for students with features like posts, messaging, notifications, and more.
 
@@ -45,8 +45,8 @@ A social media/community platform for students with features like posts, messagi
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/cedmanucdocae/instanyaw.git
-   cd instanyaw
+   git clone https://github.com/cedmanucdocae/LaConslaNet.git
+   cd LaConslaNet
    ```
 
 2. **Backend Setup**
@@ -68,7 +68,7 @@ A social media/community platform for students with features like posts, messagi
 
    ```env
    PORT=5000
-   MONGO_URI=mongodb://localhost:27017/instanyaw
+   MONGO_URI=mongodb://localhost:27017/LaConslaNet
    JWT_SECRET=your_secure_secret_key_here
    FRONTEND_URL=http://127.0.0.1:5501
    ```
@@ -110,7 +110,7 @@ A social media/community platform for students with features like posts, messagi
 ## Project Structure
 
 ```
-instanyaw/
+LaConslaNet/
 ├── backend/
 │   ├── controllers/    # Route handlers
 │   ├── middleware/     # Auth & upload middleware
