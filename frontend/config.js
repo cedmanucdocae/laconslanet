@@ -6,8 +6,9 @@
  */
 
 // Detect if we're in production (deployed) or development (localhost)
-const isProduction = window.location.hostname !== 'localhost' &&
-                     window.location.hostname !== '127.0.0.1';
+const isProduction =
+  window.location.hostname !== "localhost" &&
+  window.location.hostname !== "127.0.0.1";
 
 const CONFIG = {
   // Backend API URL - automatically uses same origin in production

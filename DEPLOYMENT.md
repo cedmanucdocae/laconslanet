@@ -31,6 +31,7 @@
    - **Output Directory**: `frontend`
 
 4. Add Environment Variables (click "Environment Variables"):
+
    ```
    MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/LaConslaNet
    JWT_SECRET=your_super_secret_jwt_key_here_change_this_in_production
@@ -44,11 +45,13 @@
 #### Option B: Deploy via CLI
 
 1. Login to Vercel:
+
    ```bash
    vercel login
    ```
 
 2. Deploy from project root:
+
    ```bash
    vercel
    ```
@@ -61,6 +64,7 @@
    - In which directory is your code located? **./**
 
 4. Add environment variables:
+
    ```bash
    vercel env add MONGO_URI
    vercel env add JWT_SECRET
@@ -83,25 +87,27 @@ vercel env add FRONTEND_URL production
 ```
 
 Then redeploy:
+
 ```bash
 vercel --prod
 ```
 
 ## Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `MONGO_URI` | MongoDB connection string | `mongodb+srv://user:pass@cluster.mongodb.net/LaConslaNet` |
-| `JWT_SECRET` | Secret key for JWT tokens | Generate with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
-| `FRONTEND_URL` | Your Vercel deployment URL | `https://your-project-name.vercel.app` |
-| `PORT` | Server port (Vercel handles this automatically) | `5000` |
-| `NODE_ENV` | Environment mode | `production` |
+| Variable       | Description                                     | Example                                                                                   |
+| -------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `MONGO_URI`    | MongoDB connection string                       | `mongodb+srv://user:pass@cluster.mongodb.net/LaConslaNet`                                 |
+| `JWT_SECRET`   | Secret key for JWT tokens                       | Generate with: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+| `FRONTEND_URL` | Your Vercel deployment URL                      | `https://your-project-name.vercel.app`                                                    |
+| `PORT`         | Server port (Vercel handles this automatically) | `5000`                                                                                    |
+| `NODE_ENV`     | Environment mode                                | `production`                                                                              |
 
 ## Important Notes
 
 ### Socket.IO Limitations on Vercel
 
 ⚠️ **WebSockets on Vercel serverless functions have limitations**:
+
 - Vercel serverless functions are stateless and have a maximum execution time
 - Socket.IO will automatically fall back to HTTP long-polling if WebSockets are not available
 - For real-time features, consider these alternatives:
@@ -143,6 +149,7 @@ After deployment, verify:
 ## Continuous Deployment
 
 Vercel automatically redeploys when you push to GitHub:
+
 ```bash
 git add .
 git commit -m "Update feature"

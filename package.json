@@ -7,7 +7,11 @@
     "dev": "cd backend && npm run dev",
     "vercel-build": "echo 'Building for Vercel deployment'"
   },
-  "keywords": ["social", "platform", "school"],
+  "keywords": [
+    "social",
+    "platform",
+    "school"
+  ],
   "author": "",
   "license": "ISC",
   "engines": {

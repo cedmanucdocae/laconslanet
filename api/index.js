@@ -15,9 +15,10 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 
 // Environment configuration
-const frontendUrl = process.env.FRONTEND_URL || process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://127.0.0.1:5501";
+const frontendUrl =
+  process.env.FRONTEND_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://127.0.0.1:5501";
 
 // Socket.IO setup
 const io = new Server(server, {
@@ -40,7 +41,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json({ limit: "10mb" }));
@@ -85,7 +86,8 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
 
 // MongoDB connection
-const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/LaConslaNet";
+const mongoUri =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/LaConslaNet";
 
 // Connect to MongoDB (connection pooling for serverless)
 let isConnected = false;
@@ -125,4 +127,3 @@ app.get("/api/health", (req, res) => {
 
 // Export for Vercel
 module.exports = app;
-
