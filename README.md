@@ -20,6 +20,7 @@ A social media/community platform for students with features like posts, messagi
 ## Tech Stack
 
 **Backend:**
+
 - Node.js
 - Express.js
 - MongoDB with Mongoose
@@ -27,6 +28,7 @@ A social media/community platform for students with features like posts, messagi
 - JWT for authentication
 
 **Frontend:**
+
 - HTML5, CSS3, JavaScript
 - Socket.IO Client
 
@@ -41,12 +43,14 @@ A social media/community platform for students with features like posts, messagi
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/cedmanucdocae/instanyaw.git
    cd instanyaw
    ```
 
 2. **Backend Setup**
+
    ```bash
    cd backend
    npm install
@@ -55,11 +59,13 @@ A social media/community platform for students with features like posts, messagi
 3. **Configure Environment Variables**
 
    Copy the example environment file and update with your values:
+
    ```bash
    cp .env.example .env
    ```
 
    Edit `.env` with your configuration:
+
    ```env
    PORT=5000
    MONGO_URI=mongodb://localhost:27017/instanyaw
@@ -68,6 +74,7 @@ A social media/community platform for students with features like posts, messagi
    ```
 
    **Important:** Generate a secure JWT secret:
+
    ```bash
    node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
    ```
@@ -77,6 +84,7 @@ A social media/community platform for students with features like posts, messagi
    Make sure MongoDB is running on your machine or update `MONGO_URI` with your MongoDB Atlas connection string.
 
 5. **Start the Backend Server**
+
    ```bash
    npm start
    # or for development with auto-restart
@@ -90,6 +98,7 @@ A social media/community platform for students with features like posts, messagi
    - Right-click on `frontend/index.html` → "Open with Live Server"
 
    Or use any local server:
+
    ```bash
    npx serve frontend -p 5501
    ```
@@ -130,16 +139,16 @@ instanyaw/
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | /api/auth/register | Register new user |
-| POST | /api/auth/login | User login |
-| GET | /api/profile/me | Get current user profile |
-| GET | /api/homeposts | Get all home posts |
-| POST | /api/homeposts | Create new post |
-| GET | /api/notifications | Get user notifications |
-| GET | /api/messages | Get conversations |
-| ... | ... | ... |
+| Method | Endpoint           | Description              |
+| ------ | ------------------ | ------------------------ |
+| POST   | /api/auth/register | Register new user        |
+| POST   | /api/auth/login    | User login               |
+| GET    | /api/profile/me    | Get current user profile |
+| GET    | /api/homeposts     | Get all home posts       |
+| POST   | /api/homeposts     | Create new post          |
+| GET    | /api/notifications | Get user notifications   |
+| GET    | /api/messages      | Get conversations        |
+| ...    | ...                | ...                      |
 
 ## Security Best Practices
 

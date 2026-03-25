@@ -30,8 +30,8 @@ const CONFIG = {
     LOSTFOUND: "/api/lostfound",
     REPORTS: "/api/reports",
     ADMIN: "/api/admin",
-    ACTIVITY: "/api/activity"
-  }
+    ACTIVITY: "/api/activity",
+  },
 };
 
 // Helper function to get full API URL
@@ -40,6 +40,6 @@ function getApiUrl(endpoint) {
 }
 
 // Export for use in modules (if using module system)
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = CONFIG;
 }

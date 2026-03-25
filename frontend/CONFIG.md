@@ -7,10 +7,10 @@
 
 ```javascript
 // For local development
-API_BASE_URL: "http://localhost:5000"
+API_BASE_URL: "http://localhost:5000";
 
 // For production (example)
-API_BASE_URL: "https://your-api-domain.com"
+API_BASE_URL: "https://your-api-domain.com";
 ```
 
 ## Usage
@@ -37,6 +37,7 @@ fetch(getApiUrl("/api/auth/login"), ...)
 ## Environment-Specific Configuration
 
 For different environments, you can create separate config files:
+
 - `config.development.js`
 - `config.production.js`
 
