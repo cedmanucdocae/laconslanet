@@ -2,15 +2,19 @@
  * Frontend Configuration
  *
  * This file contains configuration settings for the frontend application.
- * For production, update API_BASE_URL to your deployed backend URL.
+ * Automatically detects environment (development vs production).
  */
 
-const CONFIG = {
-  // Backend API URL - change this for production deployment
-  API_BASE_URL: "http://localhost:5000",
+// Detect if we're in production (deployed) or development (localhost)
+const isProduction = window.location.hostname !== 'localhost' &&
+                     window.location.hostname !== '127.0.0.1';
 
-  // Socket.IO URL - usually same as API_BASE_URL
-  SOCKET_URL: "http://localhost:5000",
+const CONFIG = {
+  // Backend API URL - automatically uses same origin in production
+  API_BASE_URL: isProduction ? window.location.origin : "http://localhost:5000",
+
+  // Socket.IO URL - same as API_BASE_URL
+  SOCKET_URL: isProduction ? window.location.origin : "http://localhost:5000",
 
   // API endpoints
   API: {
