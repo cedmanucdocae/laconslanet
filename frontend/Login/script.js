@@ -43,22 +43,23 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("userId", data.user.id);
       localStorage.setItem("firstName", data.user.firstName || "");
       localStorage.setItem("lastName", data.user.lastName || "");
-      localStorage.setItem("fullName", `${data.user.firstName} ${data.user.lastName}`);
+      localStorage.setItem(
+        "fullName",
+        `${data.user.firstName} ${data.user.lastName}`,
+      );
       localStorage.setItem("username", data.user.username);
       localStorage.setItem("email", data.user.email);
       localStorage.setItem("role", data.user.role);
       localStorage.setItem("department", data.user.department);
 
-// ⭐ ADMIN REDIRECT
-if (data.user.role === "admin" || data.user.role === "headadmin") {
-  window.location.href = "../AdminDashboard/analysis/analysis.html";
-  return;
-}
-
+      // ⭐ ADMIN REDIRECT
+      if (data.user.role === "admin" || data.user.role === "headadmin") {
+        window.location.href = "../AdminDashboard/analysis/analysis.html";
+        return;
+      }
 
       // ⭐ NORMAL USER REDIRECT
       window.location.href = "../Webpage/Homepage/Homepage.html";
-
     } catch (error) {
       console.error("🔥 Login error:", error);
       alert("⚠️ Unable to connect to the server.");
