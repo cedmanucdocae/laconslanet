@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
+  const apiBaseUrl =
+    (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+    (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+    "http://localhost:5000";
 
   if (!form) {
     console.error("❌ Error: Form with id 'registerForm' not found.");
@@ -23,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/register", {
+      const response = await fetch(`${apiBaseUrl}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

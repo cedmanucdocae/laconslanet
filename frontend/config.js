@@ -10,12 +10,23 @@ const isProduction =
   window.location.hostname !== "localhost" &&
   window.location.hostname !== "127.0.0.1";
 
+const runtimeApiBaseUrl =
+  typeof window !== "undefined" &&
+  window.RUNTIME_CONFIG &&
+  window.RUNTIME_CONFIG.API_BASE_URL
+    ? window.RUNTIME_CONFIG.API_BASE_URL
+    : null;
+
 const CONFIG = {
   // Backend API URL - automatically uses same origin in production
-  API_BASE_URL: isProduction ? window.location.origin : "http://localhost:5000",
+  API_BASE_URL:
+    runtimeApiBaseUrl ||
+    (isProduction ? window.location.origin : "http://localhost:5000"),
 
   // Socket.IO URL - same as API_BASE_URL
-  SOCKET_URL: isProduction ? window.location.origin : "http://localhost:5000",
+  SOCKET_URL:
+    runtimeApiBaseUrl ||
+    (isProduction ? window.location.origin : "http://localhost:5000"),
 
   // API endpoints
   API: {

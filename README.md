@@ -56,9 +56,9 @@ A social media/community platform for students with features like posts, messagi
    npm install
    ```
 
-3. **Configure Environment Variables**
+3. **Configure Shared Environment Variables**
 
-   Copy the example environment file and update with your values:
+   From the project root, copy the shared environment file and update values:
 
    ```bash
    cp .env.example .env
@@ -67,10 +67,13 @@ A social media/community platform for students with features like posts, messagi
    Edit `.env` with your configuration:
 
    ```env
+   NODE_ENV=development
    PORT=5000
    MONGO_URI=mongodb://localhost:27017/LaConslaNet
    JWT_SECRET=your_secure_secret_key_here
-   FRONTEND_URL=http://127.0.0.1:5501
+   FRONTEND_URL=http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5501,http://localhost:5501
+   FRONTEND_PORT=5500
+   API_BASE_URL=http://localhost:5000
    ```
 
    **Important:** Generate a secure JWT secret:
@@ -97,6 +100,8 @@ A social media/community platform for students with features like posts, messagi
    - Install "Live Server" extension in VS Code
    - Right-click on `frontend/index.html` → "Open with Live Server"
 
+   `frontend/index.html` now redirects to `frontend/Login/index.html` so login loads first.
+
    Or use any local server:
 
    ```bash
@@ -105,7 +110,26 @@ A social media/community platform for students with features like posts, messagi
 
 7. **Update Frontend Configuration** (if deploying)
 
-   Edit `frontend/config.js` to match your backend URL.
+   Use `.env` value `API_BASE_URL` for Docker runtime config, or edit `frontend/runtime-config.js` for non-Docker static hosting.
+
+### Docker Setup (Backend + Frontend + MongoDB)
+
+1. **Create root env file**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Start all services**
+
+   ```bash
+   docker compose up --build
+   ```
+
+3. **Open the app**
+
+   Frontend: `http://localhost:5500`  
+   Backend API: `http://localhost:5000`
 
 ## Project Structure
 
