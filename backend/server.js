@@ -8,11 +8,37 @@ const http = require("http");
 const app = express();
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const frontendUrl = process.env.FRONTEND_URL || "http://127.0.0.1:5501";
+const defaultFrontendOrigins = [
+  "http://127.0.0.1:5500",
+  "http://127.0.0.1:5501",
+  "http://localhost:5500",
+  "http://localhost:5501",
+];
+
+const envOrigins = (process.env.FRONTEND_URL || process.env.FRONTEND_URLS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins =
+  envOrigins.length > 0 ? envOrigins : defaultFrontendOrigins;
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  return allowedOrigins.includes(origin);
+};
+
+const corsOriginHandler = (origin, callback) => {
+  if (isAllowedOrigin(origin)) {
+    return callback(null, true);
+  }
+
+  return callback(new Error(`CORS blocked for origin: ${origin}`));
+};
 
 const io = new Server(server, {
   cors: {
-    origin: frontendUrl,
+    origin: corsOriginHandler,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   },
@@ -23,7 +49,7 @@ app.set("io", io);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: corsOriginHandler,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -70,7 +96,8 @@ app.use("/api/shares", shareRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/reports", reportRoutes);
 
-const mongoUri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/LaConslaNet";
+const mongoUri =
+  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/LaConslaNet";
 const port = process.env.PORT || 5000;
 
 mongoose
