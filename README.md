@@ -64,7 +64,7 @@ A social media/community platform for students with features like posts, messagi
    cp .env.example .env
    ```
 
-   Edit `.env` with your configuration:
+   Edit `.env` with your configuration (this is the only env file used):
 
    ```env
    NODE_ENV=development
@@ -73,7 +73,7 @@ A social media/community platform for students with features like posts, messagi
    JWT_SECRET=your_secure_secret_key_here
    FRONTEND_URL=http://127.0.0.1:5500,http://localhost:5500,http://127.0.0.1:5501,http://localhost:5501
    FRONTEND_PORT=5500
-   API_BASE_URL=http://localhost:5000
+   API_BASE_URL=http://localhost:5500
    ```
 
    **Important:** Generate a secure JWT secret:
@@ -128,8 +128,19 @@ A social media/community platform for students with features like posts, messagi
 
 3. **Open the app**
 
-   Frontend: `http://localhost:5500`  
-   Backend API: `http://localhost:5000`
+   Frontend: `http://localhost:5500`
+
+   Backend and MongoDB are internal-only in Docker and are not exposed to host ports.
+
+### Docker Hub Workflow
+
+GitHub Actions workflow is available at `.github/workflows/dockerhub.yml`.
+
+- Trigger: push to `main` or manual run
+- Required secrets: `DOCKER_USERNAME`, `DOCKER_PASSWORD`
+- Published images:
+  - `<DOCKER_USERNAME>/laconslanet-backend`
+  - `<DOCKER_USERNAME>/laconslanet-frontend`
 
 ## Project Structure
 
@@ -143,7 +154,6 @@ LaConslaNet/
 │   ├── utils/          # Helper functions
 │   ├── uploads/        # User uploaded files
 │   ├── server.js       # Main server file
-│   ├── .env.example    # Environment template
 │   └── package.json
 ├── frontend/
 │   ├── AdminDashboard/ # Admin pages

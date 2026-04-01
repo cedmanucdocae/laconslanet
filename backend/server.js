@@ -1,14 +1,8 @@
-const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 
 const rootEnvPath = path.resolve(__dirname, "../.env");
-const backendEnvPath = path.resolve(__dirname, ".env");
-const selectedEnvPath = fs.existsSync(rootEnvPath)
-  ? rootEnvPath
-  : backendEnvPath;
-
-dotenv.config({ path: selectedEnvPath });
+dotenv.config({ path: rootEnvPath });
 
 const express = require("express");
 const mongoose = require("mongoose");
