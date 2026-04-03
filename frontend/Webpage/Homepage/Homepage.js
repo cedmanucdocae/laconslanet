@@ -5,7 +5,7 @@ const apiBaseUrl =
   (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
   (window.CONFIG && window.CONFIG.API_BASE_URL) ||
   "http://localhost:5000";
-const API_BASE = apiBaseUrl;
+const API_BASE = apiBaseUrl.replace(/\/+$/, "");
 // ===============================
 // AUTH HEADERS (USER SIDE)
 // ===============================
@@ -1131,7 +1131,7 @@ function renderMedia(post) {
     if (Array.isArray(post.images) && post.images.length > 0) {
       post.images = post.images.map((img) => {
         if (img.startsWith("data:")) return img; // base64 already
-        return `http://localhost:5000/${img.replace(/^\//, "")}`;
+        return `${API_BASE}/${img.replace(/^\//, "")}`;
       });
     }
   }
@@ -1160,7 +1160,7 @@ function renderMedia(post) {
       // If it's NOT a data: URL, treat it as a server path
       if (!video.startsWith("data:")) {
         const fixed = video.startsWith("/") ? video : "/" + video;
-        src = `http://localhost:5000${fixed}`;
+        src = `${API_BASE}${fixed}`;
       }
 
       html += `
@@ -2189,7 +2189,7 @@ if (searchInput) {
 // =================================================
 // REAL-TIME SOCKET NOTIFICATION LISTENER
 // =================================================
-const socket = io("http://localhost:5000");
+const socket = io(API_BASE);
 
 // register user
 setTimeout(() => {

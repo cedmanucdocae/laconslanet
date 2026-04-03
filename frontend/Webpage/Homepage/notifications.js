@@ -10,7 +10,7 @@ const apiBaseUrl =
 
 function initNotifSocket() {
   try {
-    notifSocket = io("http://localhost:5000", {
+    notifSocket = io(apiBaseUrl, {
       transports: ["websocket", "polling"],
       path: "/socket.io/",
     });
