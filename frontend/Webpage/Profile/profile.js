@@ -5,7 +5,7 @@ const params = new URLSearchParams(window.location.search);
 const apiBaseUrl =
   (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
   (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-  "http://localhost:5000";
+  "https://backend-laconslanet.safehub-lcup.uk";
 
 let visitingUserId = null;
 
@@ -237,8 +237,7 @@ function applyProfileData(user) {
   if (!user) return;
 
   // Avatar
-  document.querySelector(".avatar").src =
-    user.avatar || "/frontend/images/avatar.png";
+  document.querySelector(".avatar").src = user.avatar || "/images/avatar.png";
 
   // Full name
   const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();

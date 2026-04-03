@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
   // Avatar stored as base64 or URL
   avatar: {
     type: String,
-    default: "/frontend/images/avatar.png",
+    default: "/images/avatar.png",
   },
 
   // 🆕 Department field
