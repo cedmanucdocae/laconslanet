@@ -6,7 +6,7 @@ let notifSocket;
 const apiBaseUrl =
   (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
   (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-  "http://localhost:5000";
+  "https://backend-laconslanet.safehub-lcup.uk";
 
 function initNotifSocket() {
   try {

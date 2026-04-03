@@ -4,7 +4,7 @@
 const apiBaseUrl =
   (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
   (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-  "http://localhost:5000";
+  "https://backend-laconslanet.safehub-lcup.uk";
 const API_BASE = apiBaseUrl.replace(/\/+$/, "");
 // ===============================
 // AUTH HEADERS (USER SIDE)
