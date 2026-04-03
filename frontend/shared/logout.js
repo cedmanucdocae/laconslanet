@@ -1,4 +1,9 @@
 // === Global Logout Handler (works on all pages and folders) ===
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
+
 document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logoutBtn");
   if (!logoutBtn) {
@@ -16,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = localStorage.getItem("token");
     try {
       // optional backend cleanup
-      await fetch("http://localhost:5000/api/auth/logout", {
+      await fetch(`${apiBaseUrl}/api/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,11 @@
 // Messages/script.js – FINAL FULL VERSION
 // Uses: JWT in localStorage.token, backend at http://localhost:5000
 
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
+
 document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   // DOM ELEMENTS
@@ -229,7 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadUserProfile(id) {
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const res = await fetch(`${apiBaseUrl}/api/users/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (!res.ok) return;
@@ -271,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/users/search?q=${encodeURIComponent(query)}`,
+        `${apiBaseUrl}/api/users/search?q=${encodeURIComponent(query)}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -333,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   // API, TOKEN, SOCKET
   // ===============================
-  const API_BASE = "http://localhost:5000/api/messages";
+  const API_BASE = `${apiBaseUrl}/api/messages`;
   const tokenKey = "token";
   const token = localStorage.getItem(tokenKey);
 
@@ -344,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Heartbeat to mark user as online
   setInterval(() => {
     if (!token) return;
-    fetch("http://localhost:5000/api/users/ping", {
+    fetch(`${apiBaseUrl}/api/users/ping`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     }).catch(() => {});
@@ -386,12 +391,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   async function loadUserStatus(userId) {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/users/${userId}/status`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const res = await fetch(`${apiBaseUrl}/api/users/${userId}/status`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) return null;
       return await res.json();
     } catch (err) {
@@ -1192,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/messages/messages/${messageId}`,
+        `${apiBaseUrl}/api/messages/messages/${messageId}`,
         {
           method: "DELETE",
           headers: {
@@ -1228,7 +1230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/messages/conversations/${activeConversationId}`,
+        `${apiBaseUrl}/api/messages/conversations/${activeConversationId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -1348,7 +1350,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadUsersAndRender() {
     if (!token) return;
     try {
-      const res = await fetch("http://localhost:5000/api/users", {
+      const res = await fetch(`${apiBaseUrl}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;

@@ -2,6 +2,10 @@
 // DETECT VISITING ANOTHER USER
 // ===============================
 const params = new URLSearchParams(window.location.search);
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
 
 let visitingUserId = null;
 
@@ -53,7 +57,7 @@ async function loadNavbarProfile() {
   if (!token) return;
 
   try {
-    const res = await fetch("http://localhost:5000/api/auth/profile", {
+    const res = await fetch(`${apiBaseUrl}/api/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -154,7 +158,7 @@ saveBtn.addEventListener("click", async () => {
   if (!token) return (window.location.href = "../../Login/index.html");
 
   try {
-    const res = await fetch("http://localhost:5000/api/profile/update", {
+    const res = await fetch(`${apiBaseUrl}/api/profile/update`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -207,7 +211,7 @@ profilePicInput.addEventListener("change", async () => {
     const base64 = e.target.result;
     const token = localStorage.getItem("token");
 
-    const res = await fetch("http://localhost:5000/api/profile/avatar", {
+    const res = await fetch(`${apiBaseUrl}/api/profile/avatar`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -266,7 +270,7 @@ async function loadProfile() {
   if (visitingUserId) return loadOtherProfile();
 
   try {
-    const res = await fetch("http://localhost:5000/api/profile/me", {
+    const res = await fetch(`${apiBaseUrl}/api/profile/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -286,12 +290,9 @@ async function loadProfile() {
 // ===============================
 async function loadOtherProfile() {
   try {
-    const res = await fetch(
-      `http://localhost:5000/api/users/${visitingUserId}`,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      },
-    );
+    const res = await fetch(`${apiBaseUrl}/api/users/${visitingUserId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
 
     const user = await res.json();
     if (!res.ok) {
@@ -468,7 +469,7 @@ async function loadPostsByUser(userId, isOwner) {
     let posts = [];
 
     for (let ep of endpoints) {
-      const res = await fetch(`http://localhost:5000/api/${ep}`, {
+      const res = await fetch(`${apiBaseUrl}/api/${ep}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

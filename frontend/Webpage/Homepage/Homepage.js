@@ -1,7 +1,11 @@
 // ===============================
 // API BASE
 // ===============================
-const API_BASE = "http://localhost:5000";
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
+const API_BASE = apiBaseUrl;
 // ===============================
 // AUTH HEADERS (USER SIDE)
 // ===============================
@@ -215,7 +219,7 @@ async function loadUserProfile() {
   if (!token) return;
 
   try {
-    const res = await fetch("http://localhost:5000/api/profile/me", {
+    const res = await fetch(`${apiBaseUrl}/api/profile/me`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const user = await res.json();
@@ -441,7 +445,7 @@ async function loadLostItems() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/lostfound", {
+    const res = await fetch(`${apiBaseUrl}/api/lostfound`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -497,8 +501,8 @@ document.getElementById("lostPostBtn").onclick = async () => {
     window.currentEdit && window.currentEdit.type === "lostfound";
 
   const url = isEditing
-    ? `http://localhost:5000/api/lostfound/${window.currentEdit.id}`
-    : "http://localhost:5000/api/lostfound";
+    ? `${apiBaseUrl}/api/lostfound/${window.currentEdit.id}`
+    : `${apiBaseUrl}/api/lostfound`;
 
   const method = isEditing ? "PUT" : "POST";
 
@@ -540,7 +544,7 @@ async function loadSchoolNews() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/news", {
+    const res = await fetch(`${apiBaseUrl}/api/news`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -594,8 +598,8 @@ document.getElementById("newsPostBtn").onclick = async () => {
   const isEditing = window.currentEdit && window.currentEdit.type === "news";
 
   const url = isEditing
-    ? `http://localhost:5000/api/news/${window.currentEdit.id}`
-    : "http://localhost:5000/api/news";
+    ? `${apiBaseUrl}/api/news/${window.currentEdit.id}`
+    : `${apiBaseUrl}/api/news`;
 
   const method = isEditing ? "PUT" : "POST";
 
@@ -637,7 +641,7 @@ async function loadAnnouncements() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/announcements", {
+    const res = await fetch(`${apiBaseUrl}/api/announcements`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -717,8 +721,8 @@ document.getElementById("announcePostBtn").onclick = async () => {
     window.currentEdit && window.currentEdit.type === "announcement";
 
   const url = isEditing
-    ? `http://localhost:5000/api/announcements/${window.currentEdit.id}`
-    : "http://localhost:5000/api/announcements";
+    ? `${apiBaseUrl}/api/announcements/${window.currentEdit.id}`
+    : `${apiBaseUrl}/api/announcements`;
 
   const method = isEditing ? "PUT" : "POST";
 
@@ -782,7 +786,7 @@ async function loadBirthdayGreetings() {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/birthdays", {
+    const res = await fetch(`${apiBaseUrl}/api/birthdays`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -862,8 +866,8 @@ document
       window.currentEdit && window.currentEdit.type === "birthday";
 
     const url = isEditing
-      ? `http://localhost:5000/api/birthdays/${window.currentEdit.id}`
-      : "http://localhost:5000/api/birthdays";
+      ? `${apiBaseUrl}/api/birthdays/${window.currentEdit.id}`
+      : `${apiBaseUrl}/api/birthdays`;
 
     const method = isEditing ? "PUT" : "POST";
 
@@ -938,8 +942,8 @@ document.getElementById("homePostBtn").addEventListener("click", async () => {
     window.currentEdit && window.currentEdit.type === "homepost";
 
   const url = isEditing
-    ? `http://localhost:5000/api/homeposts/${window.currentEdit.id}`
-    : "http://localhost:5000/api/homeposts";
+    ? `${apiBaseUrl}/api/homeposts/${window.currentEdit.id}`
+    : `${apiBaseUrl}/api/homeposts`;
 
   const method = isEditing ? "PUT" : "POST";
 
@@ -1009,19 +1013,19 @@ async function loadHomeFeed() {
   try {
     const [homeRes, birthdaysRes, announcementsRes, newsRes, lostFoundRes] =
       await Promise.all([
-        fetch("http://localhost:5000/api/homeposts", {
+        fetch(`${apiBaseUrl}/api/homeposts`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:5000/api/birthdays", {
+        fetch(`${apiBaseUrl}/api/birthdays`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:5000/api/announcements", {
+        fetch(`${apiBaseUrl}/api/announcements`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:5000/api/news", {
+        fetch(`${apiBaseUrl}/api/news`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch("http://localhost:5000/api/lostfound", {
+        fetch(`${apiBaseUrl}/api/lostfound`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -1481,7 +1485,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoutBtn)
     logoutBtn.addEventListener("click", async () => {
       try {
-        await fetch("http://localhost:5000/api/auth/logout", {
+        await fetch(`${apiBaseUrl}/api/auth/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1502,11 +1506,11 @@ function deletePost(type, id) {
   if (!token) return alert("Please log in first.");
 
   const urlMap = {
-    homepost: `http://localhost:5000/api/homeposts/${id}`,
-    birthday: `http://localhost:5000/api/birthdays/${id}`,
-    announcement: `http://localhost:5000/api/announcements/${id}`,
-    news: `http://localhost:5000/api/news/${id}`,
-    lostfound: `http://localhost:5000/api/lostfound/${id}`,
+    homepost: `${apiBaseUrl}/api/homeposts/${id}`,
+    birthday: `${apiBaseUrl}/api/birthdays/${id}`,
+    announcement: `${apiBaseUrl}/api/announcements/${id}`,
+    news: `${apiBaseUrl}/api/news/${id}`,
+    lostfound: `${apiBaseUrl}/api/lostfound/${id}`,
   };
 
   fetch(urlMap[type], {
@@ -1632,7 +1636,7 @@ async function loadLikeCount(postId, postType) {
 
   try {
     const res = await fetch(
-      `http://localhost:5000/api/likes?postId=${postId}&postType=${postType}`,
+      `${apiBaseUrl}/api/likes?postId=${postId}&postType=${postType}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
 
@@ -1653,7 +1657,7 @@ async function handleLike(id, type) {
   if (!token) return alert("Please log in first.");
 
   try {
-    const res = await fetch("http://localhost:5000/api/likes", {
+    const res = await fetch(`${apiBaseUrl}/api/likes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1715,7 +1719,7 @@ async function loadComments(postId, postType, container) {
   try {
     // 🔥 FIXED — fetch comments from API using correct params
     const res = await fetch(
-      `http://localhost:5000/api/comments?postId=${postId}&postType=${postType}`,
+      `${apiBaseUrl}/api/comments?postId=${postId}&postType=${postType}`,
       { headers: { Authorization: `Bearer ${token}` } },
     );
 
@@ -1775,7 +1779,7 @@ async function submitComment(postId, postType) {
   if (!content) return;
 
   try {
-    const res = await fetch("http://localhost:5000/api/comments", {
+    const res = await fetch(`${apiBaseUrl}/api/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1850,7 +1854,7 @@ async function loadNotificationsA() {
   if (!token) return;
 
   try {
-    const res = await fetch("http://localhost:5000/api/notifications", {
+    const res = await fetch(`${apiBaseUrl}/api/notifications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -1912,7 +1916,7 @@ async function markNotificationsAsRead() {
   if (!token) return;
 
   try {
-    await fetch("http://localhost:5000/api/notifications/mark-read", {
+    await fetch(`${apiBaseUrl}/api/notifications/mark-read`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -1940,11 +1944,11 @@ async function openPostModal(id, type) {
   }
 
   const routes = {
-    homepost: `http://localhost:5000/api/homeposts/${id}`,
-    birthday: `http://localhost:5000/api/birthdays/${id}`,
-    announcement: `http://localhost:5000/api/announcements/${id}`,
-    news: `http://localhost:5000/api/news/${id}`,
-    lostfound: `http://localhost:5000/api/lostfound/${id}`,
+    homepost: `${apiBaseUrl}/api/homeposts/${id}`,
+    birthday: `${apiBaseUrl}/api/birthdays/${id}`,
+    announcement: `${apiBaseUrl}/api/announcements/${id}`,
+    news: `${apiBaseUrl}/api/news/${id}`,
+    lostfound: `${apiBaseUrl}/api/lostfound/${id}`,
   };
 
   try {
@@ -2139,12 +2143,9 @@ if (searchInput) {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(
-        `http://localhost:5000/api/users/search?q=${query}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const res = await fetch(`${apiBaseUrl}/api/users/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       const users = await res.json();
       if (!Array.isArray(users)) return;
@@ -2274,7 +2275,7 @@ async function submitReport(postId, postType, reason) {
   }
 
   try {
-    const res = await fetch("http://localhost:5000/api/reports", {
+    const res = await fetch(`${apiBaseUrl}/api/reports`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

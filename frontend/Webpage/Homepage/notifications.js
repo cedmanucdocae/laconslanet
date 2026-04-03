@@ -3,12 +3,16 @@
 // Also assumes #notifIcon and #notifDropdown exist in DOM.
 
 let notifSocket;
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
 
 function initNotifSocket() {
   try {
     notifSocket = io("http://localhost:5000", {
       transports: ["websocket", "polling"],
-      path: "/socket.io/"
+      path: "/socket.io/",
     });
 
     notifSocket.on("connect", () => {
@@ -27,7 +31,6 @@ function initNotifSocket() {
     notifSocket.on("notificationCount", ({ count }) => {
       setNotifBadge(count);
     });
-
   } catch (err) {
     console.warn("Could not init notif socket:", err);
   }
@@ -50,7 +53,10 @@ function getNotifBadgeEl() {
 function setNotifBadge(count) {
   const b = getNotifBadgeEl();
   if (!b) return;
-  if (!count || count <= 0) { b.style.display = "none"; return; }
+  if (!count || count <= 0) {
+    b.style.display = "none";
+    return;
+  }
   b.style.display = "inline-block";
   b.textContent = count > 99 ? "99+" : count;
 }
@@ -75,9 +81,12 @@ async function loadNotifications(page = 1) {
   }
 
   try {
-    const res = await fetch(`http://localhost:5000/api/notifications?page=${page}&limit=20`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const res = await fetch(
+      `${apiBaseUrl}/api/notifications?page=${page}&limit=20`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     if (!res.ok) throw new Error("Failed to fetch notifications");
     const items = await res.json();
 
@@ -90,22 +99,29 @@ async function loadNotifications(page = 1) {
     const list = document.createElement("div");
     list.className = "notif-list";
 
-    items.forEach(n => {
+    items.forEach((n) => {
       const a = document.createElement("a");
       a.href = "#";
-a.onclick = (e) => {
-    e.preventDefault();
-    openPostModal(n.postId, n.postType);
-};
+      a.onclick = (e) => {
+        e.preventDefault();
+        openPostModal(n.postId, n.postType);
+      };
 
       a.className = "notif-item";
       if (!n.isRead) a.classList.add("unread");
 
-      const avatar = (n.sender && n.sender.avatar) || "final_icon-removebg-preview.png";
-      const name = (n.sender && (n.sender.username || `${n.sender.firstName || ""}`)) || "Someone";
-      const message = n.message || (n.type === "like" ? "liked your post" : "commented on your post");
+      const avatar =
+        (n.sender && n.sender.avatar) || "final_icon-removebg-preview.png";
+      const name =
+        (n.sender && (n.sender.username || `${n.sender.firstName || ""}`)) ||
+        "Someone";
+      const message =
+        n.message ||
+        (n.type === "like" ? "liked your post" : "commented on your post");
       const time = new Date(n.createdAt).toLocaleString();
-      const previewText = n.postPreview ? (n.postPreview.content || "").slice(0, 80) : "";
+      const previewText = n.postPreview
+        ? (n.postPreview.content || "").slice(0, 80)
+        : "";
 
       a.innerHTML = `
         <img src="${avatar}" class="notif-avatar" />
@@ -124,7 +140,6 @@ a.onclick = (e) => {
 
     dropdown.appendChild(list);
     dropdown.appendChild(footer);
-
   } catch (err) {
     console.error("Failed to load notifications", err);
     dropdown.innerHTML = "<p>Error loading notifications</p>";
@@ -136,9 +151,12 @@ async function markAllNotificationsRead() {
   const token = localStorage.getItem("token");
   if (!token) return;
   try {
-    await fetch("http://localhost:5000/api/notifications/mark-all-read", {
+    await fetch(`${apiBaseUrl}/api/notifications/mark-all-read`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
     setNotifBadge(0);
   } catch (err) {
@@ -157,9 +175,14 @@ function prependNotificationToDropdown(note) {
 
   const avatar = note.sender?.avatar || "final_icon-removebg-preview.png";
   const name = note.sender?.username || "Someone";
-  const message = note.message || (note.type === "like" ? "liked your post" : "commented on your post");
+  const message =
+    note.message ||
+    (note.type === "like" ? "liked your post" : "commented on your post");
   const time = new Date(note.createdAt).toLocaleString();
-  const preview = (note.postPreview && note.postPreview.content) ? note.postPreview.content.slice(0,80) : "";
+  const preview =
+    note.postPreview && note.postPreview.content
+      ? note.postPreview.content.slice(0, 80)
+      : "";
 
   a.innerHTML = `
     <img src="${avatar}" class="notif-avatar" />
@@ -192,7 +215,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   icon.addEventListener("click", async (e) => {
     e.stopPropagation();
-    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    dropdown.style.display =
+      dropdown.style.display === "block" ? "none" : "block";
     if (dropdown.style.display === "block") {
       await loadNotifications();
       await markAllNotificationsRead();
@@ -208,12 +232,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* Expose helpers so you can call them from Homepage.js after user loads */
 window.initNotifSocket = initNotifSocket;
-window.fetchUnreadCountAndSetBadge = async function() {
+window.fetchUnreadCountAndSetBadge = async function () {
   const token = localStorage.getItem("token");
   if (!token) return;
   try {
-    const res = await fetch("http://localhost:5000/api/notifications/unread-count", {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(`${apiBaseUrl}/api/notifications/unread-count`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
     const data = await res.json();

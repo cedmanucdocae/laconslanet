@@ -1,7 +1,11 @@
 // ========== ADMIN AUTH GUARD ==========
 
 // Change this if your backend uses a different URL
-const API_BASE = "http://localhost:5000";
+const apiBaseUrl =
+  (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+  (window.CONFIG && window.CONFIG.API_BASE_URL) ||
+  "http://localhost:5000";
+const API_BASE = apiBaseUrl;
 
 // Runs on every admin page
 async function requireAdmin() {
@@ -9,13 +13,13 @@ async function requireAdmin() {
 
   if (!token) {
     alert("Access denied. Please log in first.");
-    window.location.href = "../../Login/index.html"; 
+    window.location.href = "../../Login/index.html";
     return null;
   }
 
   try {
     const res = await fetch(`${API_BASE}/api/auth/profile`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) throw new Error("Failed to load user");
@@ -34,7 +38,6 @@ async function requireAdmin() {
     window.adminToken = token;
 
     return user;
-
   } catch (err) {
     console.error("Admin Auth Error:", err);
     alert("Session expired. Please log in again.");
@@ -45,34 +48,34 @@ async function requireAdmin() {
 }
 // Highlight active page in sidebar
 function highlightActiveMenu() {
-    const currentPath = window.location.pathname;
+  const currentPath = window.location.pathname;
 
-    document.querySelectorAll(".menu-item").forEach(item => {
-        const target = item.getAttribute("data-link");
-        if (!target) return;
+  document.querySelectorAll(".menu-item").forEach((item) => {
+    const target = item.getAttribute("data-link");
+    if (!target) return;
 
-        // Convert relative path to normalized compare string
-        const normalizedTarget = target.replace("..", "").replace(/\/\//g, "/");
-        const normalizedPath = currentPath.replace(/\/\//g, "/");
+    // Convert relative path to normalized compare string
+    const normalizedTarget = target.replace("..", "").replace(/\/\//g, "/");
+    const normalizedPath = currentPath.replace(/\/\//g, "/");
 
-        // Check if this menu-item matches the current page
-        if (normalizedPath.endsWith(normalizedTarget.replace("../", ""))) {
-            item.classList.add("active");
-        } else {
-            item.classList.remove("active");
-        }
-    });
+    // Check if this menu-item matches the current page
+    if (normalizedPath.endsWith(normalizedTarget.replace("../", ""))) {
+      item.classList.add("active");
+    } else {
+      item.classList.remove("active");
+    }
+  });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    highlightActiveMenu();
+  highlightActiveMenu();
 });
 
 // helper for authenticated fetch
 function adminHeaders(extra = {}) {
   return {
     Authorization: `Bearer ${window.adminToken || localStorage.getItem("token")}`,
-    ...extra
+    ...extra,
   };
 }
 // ========== ADMIN LOGOUT ==========
@@ -210,4 +213,3 @@ document.addEventListener("DOMContentLoaded", () => {
     setupAdminSidebar();
   }
 });
-
