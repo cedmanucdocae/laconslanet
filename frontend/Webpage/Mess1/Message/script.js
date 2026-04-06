@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }).catch(() => {});
   }, 15000);
 
-  const socket = io("http://localhost:5000", {
+  const socket = io(apiBaseUrl, {
     auth: { token },
   });
 
