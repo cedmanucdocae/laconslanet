@@ -25,13 +25,12 @@ Include the config file in your HTML before other scripts:
 Then use in your JavaScript:
 
 ```javascript
-// Instead of:
-fetch("http://localhost:5000/api/auth/login", ...)
+const apiBaseUrl =
+	(window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
+	(window.CONFIG && window.CONFIG.API_BASE_URL) ||
+	"http://localhost:5000";
 
-// Use:
-fetch(CONFIG.API_BASE_URL + CONFIG.API.AUTH + "/login", ...)
-// or
-fetch(getApiUrl("/api/auth/login"), ...)
+fetch(`${apiBaseUrl}/api/auth/login`, ...)
 ```
 
 ## Environment-Specific Configuration
