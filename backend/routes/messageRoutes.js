@@ -37,52 +37,51 @@ router.get("/conversations", protect, async (req, res) => {
       .lean();
 
     const conversations = await Promise.all(
-  convs.map(async (c) => {
-    const [lastMsg, unreadCount] = await Promise.all([
-      Message.findOne({ conversation: c._id })
-        .sort({ createdAt: -1 })
-        .lean(),
+      convs.map(async (c) => {
+        const [lastMsg, unreadCount] = await Promise.all([
+          Message.findOne({ conversation: c._id })
+            .sort({ createdAt: -1 })
+            .lean(),
 
-      Message.countDocuments({
-        conversation: c._id,
-        read: false,
-        sender: { $ne: userId },
+          Message.countDocuments({
+            conversation: c._id,
+            read: false,
+            sender: { $ne: userId },
+          }),
+        ]);
+
+        let convTitle = "";
+        let convAvatar = "";
+
+        if (c.isGroup) {
+          // NEW CORRECT GROUP FIELDS
+          convTitle = c.title || "Group chat";
+          convAvatar = c.groupAvatar || "images/default-group.png";
+        } else {
+          const other = (c.participants || []).find(
+            (p) => p && p._id.toString() !== userId.toString(),
+          );
+
+          convTitle =
+            other?.username ||
+            `${other?.firstName || ""} ${other?.lastName || ""}`.trim() ||
+            "Unknown";
+
+          convAvatar = other?.avatar || "images/default.png";
+        }
+
+        return {
+          _id: c._id,
+          isGroup: c.isGroup,
+          title: convTitle,
+          groupAvatar: convAvatar,
+          participants: c.participants,
+          admins: c.admins || [],
+          lastMessage: lastMsg || null,
+          unreadCount,
+        };
       }),
-    ]);
-
-    let convTitle = "";
-    let convAvatar = "";
-
-    if (c.isGroup) {
-      // NEW CORRECT GROUP FIELDS
-      convTitle = c.title || "Group chat";
-      convAvatar = c.groupAvatar || "images/default-group.png";
-    } else {
-      const other = (c.participants || []).find(
-        (p) => p && p._id.toString() !== userId.toString()
-      );
-
-      convTitle =
-        other?.username ||
-        `${other?.firstName || ""} ${other?.lastName || ""}`.trim() ||
-        "Unknown";
-
-      convAvatar = other?.avatar || "images/default.png";
-    }
-
-    return {
-      _id: c._id,
-      isGroup: c.isGroup,
-      title: convTitle,
-      groupAvatar: convAvatar,
-      participants: c.participants,
-      admins: c.admins || [],
-      lastMessage: lastMsg || null,
-      unreadCount,
-    };
-  })
-);
-
+    );
 
     res.json(conversations);
   } catch (err) {
@@ -98,9 +97,12 @@ router.get("/conversations/:id/messages", protect, async (req, res) => {
   try {
     const conv = await Conversation.findById(req.params.id).lean();
 
-    if (!conv) return res.status(404).json({ message: "Conversation not found" });
+    if (!conv)
+      return res.status(404).json({ message: "Conversation not found" });
 
-    if (!conv.participants.some((p) => p.toString() === req.user._id.toString()))
+    if (
+      !conv.participants.some((p) => p.toString() === req.user._id.toString())
+    )
       return res.status(403).json({ message: "Not your conversation" });
 
     const messages = await Message.find({ conversation: conv._id })
@@ -120,7 +122,7 @@ router.get("/conversations/:id/messages", protect, async (req, res) => {
 // ======================================================
 router.post("/conversations/:id/messages", protect, async (req, res) => {
   try {
-    const io = req.app.get("io");  // <-- access socket.io instance
+    const io = req.app.get("io");
 
     const { content, image, video, fileData, fileName, fileType } = req.body;
 
@@ -131,9 +133,14 @@ router.post("/conversations/:id/messages", protect, async (req, res) => {
       .populate("participants", "_id username avatar")
       .lean();
 
-    if (!conv) return res.status(404).json({ message: "Conversation not found" });
+    if (!conv)
+      return res.status(404).json({ message: "Conversation not found" });
 
-    if (!conv.participants.some(p => p._id.toString() === req.user._id.toString()))
+    if (
+      !conv.participants.some(
+        (p) => p._id.toString() === req.user._id.toString(),
+      )
+    )
       return res.status(403).json({ message: "Not your conversation" });
 
     // ----------------------------------
@@ -159,6 +166,11 @@ router.post("/conversations/:id/messages", protect, async (req, res) => {
       .populate("sender", "username avatar")
       .lean();
 
+    io.to(req.params.id).emit("new-message", {
+      conversation: req.params.id,
+      message: populated,
+    });
+
     // ----------------------------------------------------------------
     // 🔥 REAL-TIME NOTIFICATION SYSTEM (FACEBOOK-STYLE)
     // ----------------------------------------------------------------
@@ -179,16 +191,12 @@ router.post("/conversations/:id/messages", protect, async (req, res) => {
       }
     });
 
-    // ----------------------------------------------------------------
-
     res.status(201).json(populated);
-
   } catch (err) {
     console.error("Message Send Error:", err);
     res.status(500).json({ message: "Failed to send message" });
   }
 });
-
 
 // ======================================================
 // CREATE 1-ON-1 CONVERSATION
@@ -299,7 +307,9 @@ router.put("/conversations/:id/members", protect, async (req, res) => {
 
     ensureSelfIsAdmin(conv, req.user._id);
     if (!isAdmin(conv, req.user._id))
-      return res.status(403).json({ message: "Only admins can manage members" });
+      return res
+        .status(403)
+        .json({ message: "Only admins can manage members" });
 
     // Add
     add.forEach((u) => {
@@ -338,7 +348,9 @@ router.post("/conversations/:id/leave", protect, async (req, res) => {
 
     const userId = req.user._id.toString();
 
-    conv.participants = conv.participants.filter((p) => p.toString() !== userId);
+    conv.participants = conv.participants.filter(
+      (p) => p.toString() !== userId,
+    );
     conv.admins = conv.admins.filter((a) => a.toString() !== userId);
 
     // If empty → delete group & messages
@@ -361,11 +373,13 @@ router.post("/conversations/:id/leave", protect, async (req, res) => {
 // ======================================================
 router.delete("/messages/:messageId", protect, async (req, res) => {
   try {
+    const io = req.app.get("io");
     const msg = await Message.findById(req.params.messageId);
     if (!msg) return res.status(404).json({ message: "Message not found" });
 
     const conv = await Conversation.findById(msg.conversation);
-    if (!conv) return res.status(404).json({ message: "Conversation not found" });
+    if (!conv)
+      return res.status(404).json({ message: "Conversation not found" });
 
     const isSender = msg.sender.toString() === req.user._id.toString();
 
@@ -382,6 +396,11 @@ router.delete("/messages/:messageId", protect, async (req, res) => {
 
     await msg.save();
 
+    io.to(msg.conversation.toString()).emit("message-deleted", {
+      conversation: msg.conversation.toString(),
+      messageId: msg._id.toString(),
+    });
+
     res.json({ success: true });
   } catch (err) {
     console.error("Message delete error:", err);
@@ -394,18 +413,32 @@ router.delete("/messages/:messageId", protect, async (req, res) => {
 // ======================================================
 router.delete("/conversations/:id", protect, async (req, res) => {
   try {
+    const io = req.app.get("io");
     const conv = await Conversation.findById(req.params.id);
-    if (!conv) return res.status(404).json({ message: "Conversation not found" });
+    if (!conv)
+      return res.status(404).json({ message: "Conversation not found" });
 
     const isParticipant = conv.participants.some(
-      (p) => p.toString() === req.user._id.toString()
+      (p) => p.toString() === req.user._id.toString(),
     );
 
     if (!isParticipant)
       return res.status(403).json({ message: "Not your conversation" });
 
+    const participantIds = (conv.participants || []).map((p) => p.toString());
+
     await Message.deleteMany({ conversation: conv._id });
     await conv.deleteOne();
+
+    io.to(conv._id.toString()).emit("conversation-deleted", {
+      conversation: conv._id.toString(),
+    });
+
+    participantIds.forEach((userId) => {
+      io.to(userId).emit("conversation-deleted", {
+        conversation: conv._id.toString(),
+      });
+    });
 
     res.json({ success: true });
   } catch (err) {
@@ -418,7 +451,8 @@ router.put("/:id/admins/promote", protect, async (req, res) => {
   const { userId } = req.body;
 
   const convo = await Conversation.findById(req.params.id);
-  if (!convo) return res.status(404).json({ message: "Conversation not found" });
+  if (!convo)
+    return res.status(404).json({ message: "Conversation not found" });
 
   if (!convo.admins.includes(req.user._id)) {
     return res.status(403).json({ message: "Only admins can promote members" });
@@ -432,12 +466,12 @@ router.put("/:id/admins/promote", protect, async (req, res) => {
   res.json(convo);
 });
 
-
 router.put("/:id/admins/demote", protect, async (req, res) => {
   const { userId } = req.body;
 
   const convo = await Conversation.findById(req.params.id);
-  if (!convo) return res.status(404).json({ message: "Conversation not found" });
+  if (!convo)
+    return res.status(404).json({ message: "Conversation not found" });
 
   if (!convo.admins.includes(req.user._id)) {
     return res.status(403).json({ message: "Only admins can demote admins" });
@@ -448,11 +482,10 @@ router.put("/:id/admins/demote", protect, async (req, res) => {
     return res.status(400).json({ message: "Cannot remove the only admin" });
   }
 
-  convo.admins = convo.admins.filter(id => id.toString() !== userId);
+  convo.admins = convo.admins.filter((id) => id.toString() !== userId);
   await convo.save();
 
   res.json(convo);
 });
-
 
 module.exports = router;

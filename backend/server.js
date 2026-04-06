@@ -7,6 +7,8 @@ dotenv.config({ path: rootEnvPath });
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const User = require("./models/User");
 
 const http = require("http");
 const app = express();
@@ -46,6 +48,62 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   },
+});
+
+io.use(async (socket, next) => {
+  try {
+    const authToken = socket.handshake?.auth?.token || "";
+    const bearerToken = socket.handshake?.headers?.authorization || "";
+
+    const rawToken = authToken || bearerToken.replace(/^Bearer\s+/i, "");
+    if (!rawToken) return next(new Error("Unauthorized"));
+
+    const decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("_id username avatar");
+    if (!user) return next(new Error("Unauthorized"));
+
+    socket.user = {
+      _id: user._id.toString(),
+      username: user.username,
+      avatar: user.avatar,
+    };
+
+    return next();
+  } catch (err) {
+    return next(new Error("Unauthorized"));
+  }
+});
+
+io.on("connection", (socket) => {
+  const userId = socket.user?._id;
+  if (userId) {
+    socket.join(userId);
+  }
+
+  socket.on("join-conversation", (conversationId) => {
+    if (!conversationId) return;
+    socket.join(conversationId);
+  });
+
+  socket.on("typing-start", ({ conversationId }) => {
+    if (!conversationId || !socket.user) return;
+    socket.to(conversationId).emit("typing", {
+      conversationId,
+      userId: socket.user._id,
+      username: socket.user.username,
+      isTyping: true,
+    });
+  });
+
+  socket.on("typing-stop", ({ conversationId }) => {
+    if (!conversationId || !socket.user) return;
+    socket.to(conversationId).emit("typing", {
+      conversationId,
+      userId: socket.user._id,
+      username: socket.user.username,
+      isTyping: false,
+    });
+  });
 });
 // Make io available to routes
 app.set("io", io);

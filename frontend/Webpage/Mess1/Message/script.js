@@ -420,11 +420,176 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
   let conversations = [];
   let activeConversationId = null;
+  let lastHeaderStatusText = "";
+  let lastHeaderStatusColor = "";
+  let typingStopTimer = null;
+  let typingRestoreTimer = null;
+  let amITyping = false;
+  let activeConversationMessages = [];
+  const renderedMessageIds = new Set();
 
   // Group-related state
   let activeConversationIsGroup = false;
   let activeConversation = null;
   let allUsersCache = []; // filled from /api/users
+
+  function senderIdOf(message) {
+    if (!message || !message.sender) return null;
+    if (typeof message.sender === "string") return message.sender;
+    return message.sender._id || message.sender.id || null;
+  }
+
+  function isMine(message) {
+    return senderIdOf(message) === currentUserId;
+  }
+
+  function buildMessageElement(m, isGroup) {
+    const isMe = isMine(m);
+
+    const div = document.createElement("div");
+    div.className = "message " + (isMe ? "sent" : "received");
+    div.dataset.msgId = m._id || "";
+
+    const isDeleted = m.isDeleted || m.deletedForEveryone;
+
+    if (!isMe && isGroup && !isDeleted) {
+      let senderName = "";
+      if (m.sender && typeof m.sender === "object") {
+        senderName =
+          m.sender.username ||
+          `${m.sender.firstName || ""} ${m.sender.lastName || ""}`.trim();
+      }
+
+      if (senderName) {
+        const senderLabel = document.createElement("div");
+        senderLabel.className = "msg-sender";
+        senderLabel.textContent = senderName;
+        div.appendChild(senderLabel);
+      }
+    }
+
+    if (isDeleted) {
+      const placeholder = document.createElement("div");
+      placeholder.className = "deleted-msg";
+      placeholder.textContent = "This message was deleted";
+      div.appendChild(placeholder);
+    } else {
+      if (m.content && m.content.trim() !== "") {
+        const text = document.createElement("div");
+        text.textContent = m.content;
+        div.appendChild(text);
+      }
+
+      if (m.image && m.image.startsWith("data:image/")) {
+        const img = document.createElement("img");
+        img.src = m.image;
+        img.className = "chat-img";
+        img.style.marginTop = "8px";
+        div.appendChild(img);
+      }
+
+      if (m.video && m.video.startsWith("data:video/")) {
+        const vid = document.createElement("video");
+        vid.src = m.video;
+        vid.controls = true;
+        vid.className = "chat-video";
+        vid.style.marginTop = "8px";
+        div.appendChild(vid);
+      }
+
+      if (m.fileData && m.fileName) {
+        const fileLink = document.createElement("a");
+        fileLink.href = m.fileData;
+        fileLink.download = m.fileName;
+        fileLink.className = "file-bubble";
+        fileLink.innerHTML = `<i class="fa-solid fa-file-lines"></i> ${m.fileName}`;
+        div.appendChild(fileLink);
+      }
+    }
+
+    const info = document.createElement("div");
+    info.style.fontSize = "11px";
+    info.style.marginTop = "6px";
+    info.style.opacity = "0.7";
+    info.style.display = "flex";
+    info.style.justifyContent = isMe ? "flex-end" : "flex-start";
+
+    const timeText = new Date(m.createdAt).toLocaleString();
+    let seenText = "";
+
+    if (isMe && !isDeleted) {
+      if (m.seenBy && m.seenBy.length > 1) {
+        seenText = "✓ Seen";
+      } else if (m.seenBy && m.seenBy.length === 1) {
+        seenText = "✓ Delivered";
+      }
+    }
+
+    info.innerHTML = `${timeText}${seenText ? " • " + seenText : ""}`;
+    div.appendChild(info);
+
+    if (isMe && !isDeleted) {
+      const delBtn = document.createElement("button");
+      delBtn.className = "delete-msg-btn";
+      delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", () => {
+        handleDeleteMessage(m._id);
+      });
+      div.appendChild(delBtn);
+    }
+
+    return div;
+  }
+
+  function renderMessages(messages, isGroup) {
+    chatBody.innerHTML = "";
+    renderedMessageIds.clear();
+
+    messages.forEach((m) => {
+      const node = buildMessageElement(m, isGroup);
+      chatBody.appendChild(node);
+      if (m && m._id) renderedMessageIds.add(m._id);
+    });
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    activeConversationMessages = messages.slice();
+    updateSharedMedia(activeConversationMessages);
+    updateSharedFiles(activeConversationMessages);
+  }
+
+  function appendMessageRealtime(message) {
+    if (!message || !message._id) return;
+    if (renderedMessageIds.has(message._id)) return;
+
+    const node = buildMessageElement(message, activeConversationIsGroup);
+    chatBody.appendChild(node);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    renderedMessageIds.add(message._id);
+    activeConversationMessages.push(message);
+    updateSharedMedia(activeConversationMessages);
+    updateSharedFiles(activeConversationMessages);
+  }
+
+  function emitTypingStart() {
+    if (!socket || !activeConversationId || amITyping) return;
+    amITyping = true;
+    socket.emit("typing-start", { conversationId: activeConversationId });
+  }
+
+  function emitTypingStop() {
+    if (!socket || !activeConversationId || !amITyping) return;
+    amITyping = false;
+    socket.emit("typing-stop", { conversationId: activeConversationId });
+  }
+
+  function queueTypingStop() {
+    if (typingStopTimer) clearTimeout(typingStopTimer);
+    typingStopTimer = setTimeout(() => {
+      emitTypingStop();
+    }, 1200);
+  }
 
   // ===============================
   // CONVERSATION UI HELPERS
@@ -597,6 +762,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // OPEN CONVERSATION
   // ===============================
   async function openConversation(convId) {
+    emitTypingStop();
     activeConversationId = convId;
 
     document
@@ -878,126 +1044,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // ================================
-      // RENDER MESSAGES
-      // ================================
-      chatBody.innerHTML = "";
-
-      messages.forEach((m) => {
-        const isMe =
-          m.sender &&
-          (typeof m.sender === "string"
-            ? m.sender === currentUserId
-            : m.sender._id === currentUserId);
-
-        const div = document.createElement("div");
-        div.className = "message " + (isMe ? "sent" : "received");
-
-        const isDeleted = m.isDeleted || m.deletedForEveryone;
-
-        // GROUP MESSAGES → show sender label
-        if (!isMe && isGroup && !isDeleted) {
-          let senderName = "";
-
-          if (m.sender && typeof m.sender === "object") {
-            senderName =
-              m.sender.username ||
-              `${m.sender.firstName || ""} ${m.sender.lastName || ""}`.trim();
-          }
-
-          if (senderName) {
-            const senderLabel = document.createElement("div");
-            senderLabel.className = "msg-sender";
-            senderLabel.textContent = senderName;
-            div.appendChild(senderLabel);
-          }
-        }
-
-        // DELETED MESSAGE
-        if (isDeleted) {
-          const placeholder = document.createElement("div");
-          placeholder.className = "deleted-msg";
-          placeholder.textContent = "This message was deleted";
-          div.appendChild(placeholder);
-        } else {
-          // TEXT
-          if (m.content && m.content.trim() !== "") {
-            const text = document.createElement("div");
-            text.textContent = m.content;
-            div.appendChild(text);
-          }
-
-          // IMAGE
-          if (m.image && m.image.startsWith("data:image/")) {
-            const img = document.createElement("img");
-            img.src = m.image;
-            img.className = "chat-img";
-            img.style.marginTop = "8px";
-            div.appendChild(img);
-          }
-
-          // VIDEO
-          if (m.video && m.video.startsWith("data:video/")) {
-            const vid = document.createElement("video");
-            vid.src = m.video;
-            vid.controls = true;
-            vid.className = "chat-video";
-            vid.style.marginTop = "8px";
-            div.appendChild(vid);
-          }
-
-          // FILE
-          if (m.fileData && m.fileName) {
-            const fileLink = document.createElement("a");
-            fileLink.href = m.fileData;
-            fileLink.download = m.fileName;
-            fileLink.className = "file-bubble";
-            fileLink.innerHTML = `<i class="fa-solid fa-file-lines"></i> ${m.fileName}`;
-            div.appendChild(fileLink);
-          }
-        }
-
-        // TIME + SEEN
-        const info = document.createElement("div");
-        info.style.fontSize = "11px";
-        info.style.marginTop = "6px";
-        info.style.opacity = "0.7";
-        info.style.display = "flex";
-        info.style.justifyContent = isMe ? "flex-end" : "flex-start";
-
-        const timeText = new Date(m.createdAt).toLocaleString();
-        let seenText = "";
-
-        if (isMe && !isDeleted) {
-          if (m.seenBy && m.seenBy.length > 1) {
-            seenText = "✓ Seen";
-          } else if (m.seenBy && m.seenBy.length === 1) {
-            seenText = "✓ Delivered";
-          }
-        }
-
-        info.innerHTML = `${timeText}${seenText ? " • " + seenText : ""}`;
-        div.appendChild(info);
-
-        // DELETE BUTTON (self only)
-        if (isMe && !isDeleted) {
-          const delBtn = document.createElement("button");
-          delBtn.className = "delete-msg-btn";
-          delBtn.textContent = "Delete";
-          delBtn.addEventListener("click", () => {
-            handleDeleteMessage(m._id);
-          });
-          div.appendChild(delBtn);
-        }
-
-        chatBody.appendChild(div);
-      });
-
-      chatBody.scrollTop = chatBody.scrollHeight;
-
-      // UPDATE SHARED MEDIA/FILES
-      updateSharedMedia(messages);
-      updateSharedFiles(messages);
+      renderMessages(messages, isGroup);
     } catch (err) {
       if (!silent) console.error("Error loading messages:", err);
     }
@@ -1036,8 +1083,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Failed to send message");
         return;
       }
-      // Reload messages after sending
-      await loadMessages(activeConversationId, true);
+      refreshConversationsList();
     } catch (err) {
       console.error("Error sending message:", err);
       alert("Failed to send message");
@@ -1048,6 +1094,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sendBtn.addEventListener("click", () => {
       const text = messageInput.value.trim();
       if (!text) return;
+      emitTypingStop();
       sendMessageToBackend(text);
       messageInput.value = "";
     });
@@ -1057,9 +1104,27 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         const text = messageInput.value.trim();
         if (!text) return;
+        emitTypingStop();
         sendMessageToBackend(text);
         messageInput.value = "";
       }
+    });
+
+    messageInput.addEventListener("input", () => {
+      if (!activeConversationId) return;
+
+      if (messageInput.value.trim()) {
+        emitTypingStart();
+        queueTypingStop();
+      } else {
+        if (typingStopTimer) clearTimeout(typingStopTimer);
+        emitTypingStop();
+      }
+    });
+
+    messageInput.addEventListener("blur", () => {
+      if (typingStopTimer) clearTimeout(typingStopTimer);
+      emitTypingStop();
     });
   }
 
@@ -1120,8 +1185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Failed to send media.");
         return;
       }
-      // Reload messages after sending media
-      await loadMessages(activeConversationId, true);
+      refreshConversationsList();
     } catch (err) {
       console.error("Media send error:", err);
       alert("Failed to send media.");
@@ -1177,8 +1241,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Failed to send file.");
         return;
       }
-      // Reload messages after sending file
-      await loadMessages(activeConversationId, true);
+      refreshConversationsList();
     } catch (err) {
       console.error("File send error:", err);
       alert("Failed to send file.");
@@ -1373,7 +1436,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!conversation || !message) return;
 
       if (conversation === activeConversationId) {
-        loadMessages(activeConversationId, true);
+        appendMessageRealtime(message);
       }
 
       refreshConversationsList();
@@ -1381,13 +1444,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Listen for backend notification event for new messages
     socket.on("receive_message_notification", (data) => {
-      // If the notification is for the currently open conversation, reload messages
-      if (data.convId === activeConversationId) {
-        loadMessages(activeConversationId, true);
-      }
-      // Always refresh the conversation list for unread counts
       refreshConversationsList();
     });
+
+    socket.on("typing", ({ conversationId, userId, username, isTyping }) => {
+      if (!activeConversationId || conversationId !== activeConversationId)
+        return;
+      if (userId === currentUserId) return;
+
+      const headerStatus = chatHeader?.querySelector(".status");
+      if (!headerStatus) return;
+
+      if (isTyping) {
+        if (!lastHeaderStatusText) {
+          lastHeaderStatusText = headerStatus.textContent || "";
+          lastHeaderStatusColor = headerStatus.style.color || "";
+        }
+        headerStatus.textContent = `${username || "Someone"} is typing...`;
+        headerStatus.style.color = "#1f6feb";
+
+        if (typingRestoreTimer) clearTimeout(typingRestoreTimer);
+        typingRestoreTimer = setTimeout(() => {
+          headerStatus.textContent = lastHeaderStatusText;
+          headerStatus.style.color = lastHeaderStatusColor || "#777";
+          lastHeaderStatusText = "";
+          lastHeaderStatusColor = "";
+        }, 1800);
+      } else {
+        if (typingRestoreTimer) clearTimeout(typingRestoreTimer);
+        headerStatus.textContent = lastHeaderStatusText;
+        headerStatus.style.color = lastHeaderStatusColor || "#777";
+        lastHeaderStatusText = "";
+        lastHeaderStatusColor = "";
+      }
+    });
+
     socket.on("message-deleted", ({ conversation, messageId }) => {
       if (conversation === activeConversationId) {
         loadMessages(activeConversationId, true);
