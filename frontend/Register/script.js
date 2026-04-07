@@ -1,9 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
+  const sharedConfig =
+    (window.RUNTIME_CONFIG &&
+      window.RUNTIME_CONFIG.API_BASE_URL &&
+      window.RUNTIME_CONFIG) ||
+    (window.CONFIG && window.CONFIG.API_BASE_URL && window.CONFIG) ||
+    (typeof CONFIG !== "undefined" ? CONFIG : null);
   const apiBaseUrl =
-    (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
-    (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-    "http://localhost:5000";
+    (sharedConfig && sharedConfig.API_BASE_URL) || "http://localhost:5000";
 
   if (!form) {
     console.error("❌ Error: Form with id 'registerForm' not found.");

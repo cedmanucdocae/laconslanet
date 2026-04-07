@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User");
+const JWT_SECRET = process.env.JWT_SECRET || "dev-local-secret";
 
 const http = require("http");
 const app = express();
@@ -58,7 +59,7 @@ io.use(async (socket, next) => {
     const rawToken = authToken || bearerToken.replace(/^Bearer\s+/i, "");
     if (!rawToken) return next(new Error("Unauthorized"));
 
-    const decoded = jwt.verify(rawToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(rawToken, JWT_SECRET);
     const user = await User.findById(decoded.id).select("_id username avatar");
     if (!user) return next(new Error("Unauthorized"));
 

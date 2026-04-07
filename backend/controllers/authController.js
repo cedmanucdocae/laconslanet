@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.JWT_SECRET || "dev-local-secret";
 
 // Allowed departments
 const ALLOWED_DEPARTMENTS = ["CITE", "CAMP", "CASE", "CBEA", "CITHM"];
@@ -31,7 +32,6 @@ const register = async (req, res) => {
     // Auto generate username from email prefix
     const generatedUsername = email.split("@")[0];
 
-    // Create new user (let Mongoose pre-save hook hash password)
     const newUser = new User({
       firstName,
       lastName,
@@ -65,10 +65,26 @@ const login = async (req, res) => {
   try {
     const { email, username, password } = req.body;
 
-    // Login using email OR username
-    const user = await User.findOne({
-      $or: [{ email }, { username }],
-    }).select("+password");
+    const normalizedEmail =
+      typeof email === "string" ? email.trim().toLowerCase() : "";
+    const normalizedUsername =
+      typeof username === "string" ? username.trim() : "";
+
+    // Build query only with provided credentials to avoid matching undefined fields
+    let query;
+    if (normalizedEmail && normalizedUsername) {
+      query = {
+        $or: [{ email: normalizedEmail }, { username: normalizedUsername }],
+      };
+    } else if (normalizedEmail) {
+      query = { email: normalizedEmail };
+    } else if (normalizedUsername) {
+      query = { username: normalizedUsername };
+    } else {
+      return res.status(400).json({ message: "Email or username is required" });
+    }
+
+    const user = await User.findOne(query).select("+password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -99,7 +115,7 @@ const login = async (req, res) => {
         role: user.role,
         department: user.department,
       },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "1d" },
     );
 

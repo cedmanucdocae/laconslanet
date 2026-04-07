@@ -1,3 +1,3 @@
 window.RUNTIME_CONFIG = {
-  API_BASE_URL: "https://backend-laconslanet.safehub-lcup.uk",
+  API_BASE_URL: "http://localhost:5000",
 };

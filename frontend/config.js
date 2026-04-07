@@ -18,15 +18,11 @@ const runtimeApiBaseUrl =
     : null;
 
 const CONFIG = {
-  // Backend API URL - automatically uses same origin in production
-  API_BASE_URL:
-    runtimeApiBaseUrl ||
-    (isProduction ? window.location.origin : "http://localhost:5000"),
+  // Force production backend URL for all API requests
+  API_BASE_URL: "https://backend-laconslanet.safehub-lcup.uk",
 
   // Socket.IO URL - same as API_BASE_URL
-  SOCKET_URL:
-    runtimeApiBaseUrl ||
-    (isProduction ? window.location.origin : "http://localhost:5000"),
+  SOCKET_URL: "https://backend-laconslanet.safehub-lcup.uk",
 
   // API endpoints
   API: {
@@ -49,6 +45,11 @@ const CONFIG = {
     ACTIVITY: "/api/activity",
   },
 };
+
+if (typeof window !== "undefined") {
+  window.CONFIG = CONFIG;
+  window.getApiUrl = getApiUrl;
+}
 
 // Helper function to get full API URL
 function getApiUrl(endpoint) {
