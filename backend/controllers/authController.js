@@ -82,11 +82,15 @@ const login = async (req, res) => {
     }
 
     // Debugging logs
-    console.log("Entered password:", password);
-    console.log("Stored hash:", user.password);
+    console.log("[LOGIN] Email/Username:", email || username);
+    console.log("[LOGIN] Entered password:", password);
+    console.log("[LOGIN] Stored hash:", user.password);
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("bcrypt.compare result:", isMatch);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+    console.log("[LOGIN] bcrypt.compare result:", isMatch);
+    if (!isMatch) {
+      console.log("[LOGIN] Invalid password for user:", user.email);
+      return res.status(400).json({ message: "Invalid password" });
+    }
 
     // Generate JWT
     const token = jwt.sign(
@@ -126,12 +130,15 @@ const logout = async (req, res) => {
 // ========================== GET PROFILE ==========================
 const getProfile = async (req, res) => {
   try {
+    console.log("[PROFILE] req.user:", req.user);
     const user = await User.findById(req.user.id).select("-password");
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
+    if (!user) {
+      console.log("[PROFILE] User not found for id:", req.user.id);
+      return res.status(404).json({ message: "User not found" });
+    }
     res.json(user);
   } catch (err) {
+    console.error("[PROFILE] Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

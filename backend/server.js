@@ -174,14 +174,14 @@ mongoose
         const adminRole = "admin";
         let user = await User.findOne({ email });
         if (!user) {
-          // Use required fields for User model
           user = new User({
             email,
-            password,
+            password, // Let Mongoose pre-save hook hash it
             role: adminRole,
             firstName: "Admin",
             lastName: "Account",
-            department: "CITE", // Default department, change if needed
+            department: "CITE",
+            username: "admin",
           });
           await user.save();
           console.log("Admin user created:", email);
