@@ -6,7 +6,7 @@ adminuser.css * {
 }
 
 body {
-  background: url("images/lcup-bg.png") center/cover fixed;
+  font-family: "Poppins", sans-serif;
   background: #2b2a2a;
   color: #111827;
 }
@@ -117,8 +117,7 @@ body {
 
 /* bottom buttons */
 .sidebar-bottom {
-  margin-top: auto;
-  padding-top: 20px;
+  padding: 20px 0 0;
   display: flex;
   flex-direction: column;
   gap: 12px;

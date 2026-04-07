@@ -139,6 +139,7 @@ const userRoutes = require("./routes/userRoutes");
 const shareRoutes = require("./routes/shareRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const adminModerationRoutes = require("./routes/adminModerationRoutes");
 
 // Mount all routes
 app.use("/api/auth", authRoutes);
@@ -152,6 +153,7 @@ app.use("/api/lostfound", lostFoundRoutes);
 app.use("/api/likes", likeRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminModerationRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);

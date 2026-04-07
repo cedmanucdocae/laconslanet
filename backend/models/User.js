@@ -42,6 +42,16 @@ const userSchema = new mongoose.Schema({
 
   isBanned: { type: Boolean, default: false },
 
+  warnings: { type: Number, default: 0 },
+
+  violations: [
+    {
+      type: { type: String, enum: ["warning", "ban"] },
+      reason: String,
+      date: { type: Date, default: Date.now },
+    },
+  ],
+
   createdAt: { type: Date, default: Date.now },
 
   lastSeen: {
