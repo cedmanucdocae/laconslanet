@@ -166,6 +166,34 @@ mongoose
   .connect(mongoUri)
   .then(() => {
     console.log("Connected to MongoDB");
+    // Autorun admin account creation/update
+    (async () => {
+      try {
+        const email = "admin@admin.com";
+        const password = "admin12345";
+        const adminRole = "admin";
+        let user = await User.findOne({ email });
+        if (!user) {
+          // Use required fields for User model
+          user = new User({
+            email,
+            password,
+            role: adminRole,
+            firstName: "Admin",
+            lastName: "Account",
+            department: "CITE", // Default department, change if needed
+          });
+          await user.save();
+          console.log("Admin user created:", email);
+        } else {
+          user.role = adminRole;
+          await user.save();
+          console.log("Existing user updated to admin:", email);
+        }
+      } catch (err) {
+        console.error("Admin setup error:", err);
+      }
+    })();
     server.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
