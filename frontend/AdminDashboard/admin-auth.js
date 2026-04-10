@@ -1,10 +1,19 @@
 // ========== ADMIN AUTH GUARD ==========
 
-// Change this if your backend uses a different URL
+const isLocalHost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+const inferredBackendHost = window.location.hostname.startsWith("backend-")
+  ? window.location.hostname
+  : `backend-${window.location.hostname}`;
+
+const inferredProductionApiBase = `${window.location.protocol}//${inferredBackendHost}`;
+
 const apiBaseUrl =
   (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG.API_BASE_URL) ||
   (window.CONFIG && window.CONFIG.API_BASE_URL) ||
-  "http://localhost:5000";
+  (isLocalHost ? "http://localhost:5000" : inferredProductionApiBase);
 const API_BASE = apiBaseUrl;
 
 // Runs on every admin page
